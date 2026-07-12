@@ -323,6 +323,32 @@ button.btn:disabled{opacity:.4; cursor:default; box-shadow:none; transform:none;
     <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
       <button class="btn gold hidden" id="btn-continue">▶ CONTINUAR DE ONDE PAREI</button>
       <button class="btn" id="btn-start">📖 COMEÇAR DO ZERO</button>
+      <button class="btn secondary" id="btn-patchnotes" style="font-size:11px; padding:8px 18px;">📋 Notas da atualização — v1.1</button>
+    </div>
+
+    <div id="patchnotes-panel" class="hidden" style="text-align:left; max-width:480px; margin:18px auto 0; background:rgba(255,255,255,.5); border:1px dashed var(--ink-soft); padding:14px 16px; border-radius:4px; font-size:11.5px; line-height:1.7;">
+      <div style="font-family:'Caveat',cursive; font-size:20px; color:var(--red-pen); margin-bottom:6px;">🛠 Atualização 1.1 — Notas do Patch</div>
+      <b>Balanceamento</b>
+      <ul style="margin:4px 0 10px 16px; padding:0;">
+        <li>Batalha final da Carmen ficou mais justa: menos HP e menos dano por golpe (testers reclamaram, e tinham razão).</li>
+        <li>Rafael ganha um kit de itens extra do Clodoaldo antes da luta final.</li>
+        <li>Toda batalha agora tem um "Ataque Básico" de custo zero — nunca mais fica sem opção.</li>
+        <li>Botão "🔄 Recomeçar" sempre visível durante qualquer luta.</li>
+      </ul>
+      <b>Novidades</b>
+      <ul style="margin:4px 0 10px 16px; padding:0;">
+        <li>Imagens reais dos personagens (PNG) em vez de emoji, se os arquivos estiverem na mesma pasta do jogo.</li>
+        <li>Sistema de save automático — o jogo lembra por onde você parou.</li>
+        <li>Interclasse 3x3 do CEDUP: quartas, semi e final, com eliminação real se você perder.</li>
+        <li>Trechos jogáveis controlando o Remy ou o Everton em missões próprias.</li>
+        <li>Dois epílogos escolhíveis ao terminar o jogo: 🔥 Modo Fogo Eterno ou 📚 Modo Estudante Exemplar.</li>
+        <li>Professor Julio e Professor de Artes entraram na história, com desenvolvimento próprio.</li>
+      </ul>
+      <b>Ajustes de personagem</b>
+      <ul style="margin:4px 0 0 16px; padding:0;">
+        <li>Everton revisado: mais tranquilo, guitarrista e fã de rock, só se irrita ocasionalmente (antes tava exagerado).</li>
+        <li>Leandro, Clodoaldo e John Lennon ganharam cenas extras de desenvolvimento.</li>
+      </ul>
     </div>
   </div>
 
@@ -1304,11 +1330,11 @@ const BATTLES = {
   carmen:{
     title:"Diretora Carmen — Julgamento Final",
     enemyKey:"carmen",
-    allies:()=>[fighterTemplate("rafael",70,10,["flexao","zoeira","grito","fogoTotal"])],
-    enemy:()=>({key:"carmen", maxHp:88, hp:88, moves:[
-      {name:"Corte Orçamentário", dmg:[10,15], desc:"", kind:"dmg", w:3},
-      {name:"Reunião com Investidores", dmg:[8,13], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:2},
-      {name:"Advertência Formal", dmg:[14,20], desc:"", kind:"dmg", w:2},
+    allies:()=>[fighterTemplate("rafael",72,10,["flexao","zoeira","grito","fogoTotal"])],
+    enemy:()=>({key:"carmen", maxHp:76, hp:76, moves:[
+      {name:"Corte Orçamentário", dmg:[9,14], desc:"", kind:"dmg", w:3},
+      {name:"Reunião com Investidores", dmg:[7,11], desc:"", kind:"dmg", status:"raiva", chance:0.35, w:2},
+      {name:"Advertência Formal", dmg:[12,17], desc:"", kind:"dmg", w:1},
     ]}),
     reward:"A batalha mais dura do dia. Se Rafael venceu, ele provou que consegue ser estratégico sob pressão máxima.",
   }
@@ -1838,6 +1864,10 @@ function resetState(){
   STATE.inventory={powerbank:1, cola:2, redbull:2, notafalsa:0, resumo:0};
   refreshTopbar();
 }
+
+$("#btn-patchnotes").addEventListener("click", ()=>{
+  $("#patchnotes-panel").classList.toggle("hidden");
+});
 
 $("#btn-start").addEventListener("click", ()=>{
   resetState();
