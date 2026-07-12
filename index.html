@@ -316,8 +316,14 @@ button.btn:disabled{opacity:.4; cursor:default; box-shadow:none; transform:none;
       <b>Objetivo:</b> sobreviver até o fim do dia com a maior nota possível.<br>
       <b>Aviso:</b> o jogo é osso. Estratégia importa mais que força bruta.
     </div>
+    <div id="save-indicator" class="hidden" style="font-size:11px;color:var(--ink-soft);margin-bottom:10px;">
+      💾 Progresso salvo encontrado — <span id="save-scene-label"></span>
+    </div>
     <br>
-    <button class="btn gold" id="btn-start">📖 COMEÇAR O DIA</button>
+    <div style="display:flex; flex-direction:column; gap:10px; align-items:center;">
+      <button class="btn gold hidden" id="btn-continue">▶ CONTINUAR DE ONDE PAREI</button>
+      <button class="btn" id="btn-start">📖 COMEÇAR DO ZERO</button>
+    </div>
   </div>
 
   <!-- STAGE / DIALOGUE -->
@@ -401,6 +407,11 @@ const CHAR = {
   ditador: {name:"Marechal Pak", color:"#5a1f1f", emoji:"⭐", init:"MP", img:"ditador.png"},
   julio:   {name:"Professor Julio", color:"#2f7a4f", emoji:"⚽", init:"JU", img:"julio.png"},
   artesprof:{name:"Professor de Artes", color:"#a13d6b", emoji:"🎨", init:"PA", img:"artes.png"},
+  assessor:{name:"Assessor Kim", color:"#4a2020", emoji:"🕴️", init:"AK"},
+  zelador: {name:"Seu Valdomiro", color:"#5a4a30", emoji:"🧹", init:"VD"},
+  rivalA:  {name:"Time do Bloco B", color:"#2f5a8a", emoji:"🏀", init:"BB"},
+  rivalB:  {name:"Time do 3º Ano", color:"#8a3a2f", emoji:"🏀", init:"3A"},
+  rivalC:  {name:"Time dos Veteranos", color:"#4a4a4a", emoji:"🏀", init:"VT"},
   narrator:{name:"Narrador", color:"#22201b", emoji:"📓", init:"..."}
 };
 
@@ -862,6 +873,89 @@ SCRIPT.pais = {
     line(["sidneia","rafael","fred","jef","chica","babaiaga"], "babaiaga", "babaiaga","Detalhes, detalhes. Rafael, netinho, essa mulher tem uma energia de quem nunca comeu biscoito quente. Toma um, coordenadora, vai te acalmar."),
     line(["sidneia","rafael","fred","jef","chica","babaiaga"], "sidneia", "sidneia","*aceita o biscoito só pra fazer a conversa parar* ...Obrigada. Certo. Rafael, você está de aviso. A próxima é com a diretora Carmen em pessoa, e ela não perdoa igual eu."),
     line(["sidneia","rafael","fred","jef","chica","babaiaga"], "babaiaga", "babaiaga","*sussurra pro Rafael saindo* Se precisar de reforço moral lá na sala da diretora, é só me chamar. Eu já sobrevivi a coisa pior que diretora de escola."),
+    {sceneEnd:true, goto:"enquantoIsso"}
+  ]
+};
+
+/* ---------- 11B. ENQUANTO ISSO — ESCOLHA DE PERSONAGEM ---------- */
+SCRIPT.enquantoIsso = {
+  label:"Enquanto isso, no resto da escola...",
+  bgimg:BG.corredor,
+  beats:[
+    line([], null, "narrator","Enquanto Rafael respira fundo esperando a bronca acabar, DUAS coisas acontecem ao mesmo tempo em pontos diferentes da escola. Você decide qual delas acompanhar de perto.", "Enquanto isso..."),
+    line(["remy"], "remy", "narrator","Remy avista, pela janela, um homem de terno estranho perguntando por 'um garoto asiático de uniforme' pro pessoal da secretaria. Ele reconhece na hora: é o assessor pessoal do próprio pai."),
+    line(["everton","zelador"], "everton", "narrator","Ao mesmo tempo, no outro corredor, Seu Valdomiro, o zelador, encurrala Everton jurando que foi ele quem quebrou uma vidraça assobiando 'fora do tom' — o que, aliás, nem é fisicamente possível."),
+    {choice:true, txt:"Quem você quer controlar agora?", options:[
+      {label:"🕴️ Controlar o Remy — interceptar o Assessor Kim", effect:()=>{STATE.flags.controlouRemy=true;}},
+      {label:"🎸 Controlar o Everton — resolver o mal-entendido com Seu Valdomiro", effect:()=>{STATE.flags.controlouEverton=true;}}
+    ]},
+    {sceneEnd:true, goto:()=> STATE.flags.controlouRemy ? "remyMissao" : "evertonMissao"}
+  ]
+};
+
+/* ---------- 11C. REMY SOLO ---------- */
+SCRIPT.remyMissao = {
+  label:"Corredor da secretaria",
+  bgimg:BG.corredor,
+  beats:[
+    line(["remy","assessor"], "remy", "remy","*se esgueira pelo corredor, coração acelerado* Assessor Kim?! Aqui?! Se ele encontrar meu pai antes da hora certa, vai ser um desastre diplomático dentro de uma escola pública.","Corredor da secretaria"),
+    line(["remy","assessor"], "assessor", "assessor","*vira-se, terno impecável, olhar gelado* Jovem Remy. Que coincidência. Vim inspecionar o ambiente antes da chegada do Marechal. Protocolo padrão."),
+    line(["remy","assessor"], "remy", "remy","Assessor, com todo respeito, 'protocolo padrão' não inclui invadir a secretaria de uma escola brasileira de surpresa."),
+    line(["remy","assessor"], "assessor", "assessor","O Marechal exige segurança absoluta. Vou revistar cada sala até garantir isso — a começar pela sua."),
+    line([], null, "narrator","Agora você controla o Remy. É hora de interceptar o Assessor Kim antes que ele cause um escândalo."),
+    {battleId:"remySolo", winGoto:"remyMissaoFim", loseGoto:"remyMissaoFimDificil"},
+  ]
+};
+SCRIPT.remyMissaoFim = {
+  label:"Corredor da secretaria",
+  bgimg:BG.corredor,
+  beats:[
+    line(["remy","assessor"], "assessor", "assessor","*ajeita o terno, meio sem graça* ...Impressionante, jovem Remy. Talvez você tenha aprendido algo por aqui além de perguntar tudo pra máquina."),
+    line(["remy","assessor"], "remy", "remy","Aprendi, sim. Agora, por favor, espera o Marechal no portão como gente normal. Sem inspeção surpresa."),
+    line(["remy","assessor"], "assessor", "assessor","*suspira* Combinado. Vou avisar que está tudo... 'sob controle'."),
+    line(["remy","assessor"], "narrator", "narrator","Remy respira aliviado. Missão cumprida — por enquanto."),
+    {sceneEnd:true, goto:"cameoDitador"}
+  ]
+};
+SCRIPT.remyMissaoFimDificil = {
+  label:"Corredor da secretaria",
+  bgimg:BG.corredor,
+  beats:[
+    line(["remy","assessor"], "assessor", "assessor","*nem suado* Vejo que ainda tem muito a aprender, jovem Remy. Vou revistar mesmo assim. Por protocolo."),
+    line(["remy","assessor"], "remy", "remy","*resignado* Tudo bem. Só... por favor, discrição."),
+    line(["remy","assessor"], "narrator", "narrator","O Assessor Kim faz sua inspeção completa, meio exagerada, mas sem causar escândalo maior. Remy aprende que nem toda missão precisa ser vencida de forma espetacular pra dar certo."),
+    {sceneEnd:true, goto:"cameoDitador"}
+  ]
+};
+
+/* ---------- 11D. EVERTON SOLO ---------- */
+SCRIPT.evertonMissao = {
+  label:"Corredor dos armários",
+  bgimg:BG.corredor,
+  beats:[
+    line(["everton","zelador"], "zelador", "zelador","*aponta o dedo, vassoura na outra mão* Foi você! Só pode ter sido você! Assobiando essas frequência estranha e quebrando vidraça!","Corredor dos armários"),
+    line(["everton","zelador"], "everton", "everton","Seu Valdomiro, olha... eu realmente assobio sem perceber às vezes, mas quebrar vidro com assobio não é fisicamente possível, isso é mito de desenho animado."),
+    line(["everton","zelador"], "zelador", "zelador","NÃO INVENTA CIÊNCIA PRA CIMA DE MIM, RAPAZ! Vem comigo pra Sidneia agora mesmo!"),
+    line([], null, "narrator","Agora você controla o Everton. É hora de desarmar essa confusão toda antes que vire uma dor de cabeça."),
+    {battleId:"evertonSolo", winGoto:"evertonMissaoFim", loseGoto:"evertonMissaoFimDificil"},
+  ]
+};
+SCRIPT.evertonMissaoFim = {
+  label:"Corredor dos armários",
+  bgimg:BG.corredor,
+  beats:[
+    line(["everton","zelador"], "zelador", "zelador","*abaixa a vassoura, meio encabulado* ...Tá bom, tá bom. Talvez não tenha sido você. Mas assobia menos, cansa meu ouvido."),
+    line(["everton","zelador"], "everton", "everton","Combinado, Seu Valdomiro. E olha, se quiser, um dia eu toco um negócio no violão pro senhor. Sem assobio."),
+    line(["everton","zelador"], "zelador", "zelador","*sorri de leve, pela primeira vez no dia* Isso eu aceito."),
+    {sceneEnd:true, goto:"cameoDitador"}
+  ]
+};
+SCRIPT.evertonMissaoFimDificil = {
+  label:"Corredor dos armários",
+  bgimg:BG.corredor,
+  beats:[
+    line(["everton","zelador"], "zelador", "zelador","*nem convencido* Vou deixar passar, mas vou ficar de olho em você, moço do assobio."),
+    line(["everton","zelador"], "everton", "everton","*suspira* Justo. Um dia ainda provo minha inocência, Seu Valdomiro."),
     {sceneEnd:true, goto:"cameoDitador"}
   ]
 };
@@ -905,6 +999,112 @@ SCRIPT.boss1 = {
     line([], null, "narrator","Batalha contra o Professor Clodoaldo — mais um teste de caráter do que uma guerra de verdade."),
     {battleId:"clodoaldo"},
     line(["clodoaldo","rafael"], "clodoaldo", "clodoaldo","*ofegante, mas sorrindo* Ok. Ok! Você me convenceu. Bora, Rafael. Vamos encarar a Carmen juntos."),
+    line(["clodoaldo","rafael"], "clodoaldo", "clodoaldo","Só uma coisa antes: hoje à tarde é o interclasse 3x3 do CEDUP. Se você quiser, ainda dá tempo de jogar antes de ir até a sala da Carmen — pode ser uma boa forma de mostrar que você também constrói coisa boa pra escola, não só confusão."),
+    line(["clodoaldo","rafael"], "rafael", "rafael","Interclasse? Cara, com o Arthur na equipe, isso pode ser nossa vingança-relâmpago depois do 1x1 de hoje de manhã."),
+    {sceneEnd:true, goto:"interclasseIntro"}
+  ]
+};
+
+/* ---------- 13B. INTERCLASSE 3x3 — INTRODUÇÃO ---------- */
+SCRIPT.interclasseIntro = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "julio", "julio","*com um megafone, MUITO animado* ATENÇÃO, CEDUP! Hoje é dia de INTERCLASSE 3x3! Quartas, semifinal e grande final, tudo na mesma tarde!","Quadra do CEDUP — Interclasse"),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "arthur", "arthur","Rafael! Bora, dessa vez lado a lado, não um contra o outro. Você e eu, dupla de verdade."),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "rafael", "rafael","Fechado, Arthur. Depois do 1x1 de hoje de manhã, acho que a gente já sabe que joga bem junto."),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "everton", "everton","Eu e o Nicolas ficamos na torcida com o Remy. Alguém tem que gritar de verdade da lateral."),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "nicolas", "nicolas","*já com uma planilha em mãos* Preparei uma análise estatística dos times adversários. O Time do Bloco B tem 63% de aproveitamento em arremessos de fora. Cuidado."),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "remy", "remy","Eu ia perguntar pro ChatGPT uma estratégia, mas o Nicolas já fez isso melhor com números de verdade. Boa, Nicolas."),
+    line(["julio","rafael","arthur","everton","nicolas","remy"], "julio", "julio","Bom, chega de conversa, hora de jogo! E se alguém perguntar, sim, meu filho o Calebe também já jogou um interclasse desses — só que ele ganhou TODOS."),
+    line([], null, "narrator","É hora das QUARTAS DE FINAL: Rafael e Arthur contra o Time do Bloco B. Se perder aqui, o dia de interclasse acaba na hora — sem segunda chance."),
+    {battleId:"interclasseQuartas", winGoto:"interclasseSemisIntro", loseGoto:"interclasseElimQuartas"},
+  ]
+};
+
+/* ---------- 13C. INTERCLASSE — ELIMINADO NAS QUARTAS ---------- */
+SCRIPT.interclasseElimQuartas = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    {effect:()=>{STATE.flags.interclasseResultado="quartas";}},
+    line(["rafael","arthur","everton","nicolas"], "arthur", "arthur","*mãos na cabeça* Caímos nas quartas... o Bloco B jogou pesado demais hoje.","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas"], "rafael", "rafael","Relaxa, Arthur. A gente tentou de verdade, isso já vale alguma coisa."),
+    line(["rafael","arthur","everton","nicolas"], "nicolas", "nicolas","Estatisticamente, 71% das equipes eliminadas nas quartas dizem exatamente essa frase. Mas eu concordo com o sentimento."),
+    line(["rafael","arthur","everton","nicolas"], "everton", "everton","Bora, ainda tem a Carmen te esperando. Foco no que ainda dá pra vencer hoje."),
+    {sceneEnd:true, goto:"finalBattleIntro"}
+  ]
+};
+
+/* ---------- 13D. INTERCLASSE — SEMIFINAL ---------- */
+SCRIPT.interclasseSemisIntro = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    line(["rafael","arthur","everton","nicolas","remy"], "everton", "everton","VOCÊS PASSARAM DAS QUARTAS! Isso pede um solo de comemoração.","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas","remy"], "arthur", "arthur","Sem tempo pra solo agora, Everton, a semifinal já vai começar. O 3º Ano joga em dupla sincronizada, cuidado."),
+    line(["rafael","arthur","everton","nicolas","remy"], "nicolas", "nicolas","Atualizei a planilha: o 3º Ano marca em zona. Se vocês circularem a bola rápido, encontram brecha."),
+    line(["rafael","arthur","everton","nicolas","remy"], "julio", "julio","*grita do alambrado* VAMOS QUE VAMOS! E lembrem, se o Calebe tivesse aqui, ele já tinha resolvido isso nos primeiros dois minutos!"),
+    line(["rafael","arthur","everton","nicolas","remy"], "rafael", "rafael","(O professor Julio realmente não perde uma oportunidade.)"),
+    line([], null, "narrator","SEMIFINAL: Rafael e Arthur contra o Time do 3º Ano. Perder aqui significa parar na semi — sem chegar à decisão."),
+    {battleId:"interclasseSemis", winGoto:"interclasseFinalIntro", loseGoto:"interclasseElimSemis"},
+  ]
+};
+
+/* ---------- 13E. INTERCLASSE — ELIMINADO NA SEMI ---------- */
+SCRIPT.interclasseElimSemis = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    {effect:()=>{STATE.flags.interclasseResultado="semis";}},
+    line(["rafael","arthur","everton","nicolas"], "arthur", "arthur","Semifinal... tão perto. O 3º Ano jogou redondo demais hoje.","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas"], "nicolas", "nicolas","Chegar na semifinal já coloca vocês entre os quatro melhores times do CEDUP. Estatisticamente isso é um resultado respeitável."),
+    line(["rafael","arthur","everton","nicolas"], "rafael", "rafael","Valeu, Nicolas. Bora, ainda tenho um julgamento com a Carmen te esperando."),
+    {sceneEnd:true, goto:"finalBattleIntro"}
+  ]
+};
+
+/* ---------- 13F. INTERCLASSE — GRANDE FINAL ---------- */
+SCRIPT.interclasseFinalIntro = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    line(["rafael","arthur","everton","nicolas","remy"], "arthur", "arthur","GRANDE FINAL, Rafael! Contra o Time dos Veteranos — ex-alunos que voltam todo ano só pra ganhar esse troféu.","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas","remy"], "remy", "remy","Eles têm até camisa personalizada. Isso é assustadoramente organizado pra um time de ex-aluno."),
+    line(["rafael","arthur","everton","nicolas","remy"], "everton", "everton","Vocês chegaram até aqui jogando junto. Só falta manter o ritmo. Eu, o Remy e o Nicolas vamos gritar tão alto que vocês vão ouvir daqui até a sala da Carmen."),
+    line(["rafael","arthur","everton","nicolas","remy"], "julio", "julio","*emocionado* Se vocês ganharem essa final, eu prometo: não falo do Calebe pelo resto do dia. Bom, talvez só mais uma vez."),
+    line([], null, "narrator","A GRANDE FINAL do interclasse. Última chance de ser campeão do CEDUP."),
+    {battleId:"interclasseFinal", winGoto:"interclasseCampeao", loseGoto:"interclasseElimFinal"},
+  ]
+};
+
+/* ---------- 13G. INTERCLASSE — VICE-CAMPEÃO ---------- */
+SCRIPT.interclasseElimFinal = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    {effect:()=>{STATE.flags.interclasseResultado="vice";}},
+    line(["rafael","arthur","everton","nicolas","remy"], "arthur", "arthur","Vice-campeão... contra um time de ex-aluno que treina junto há anos. Não é vergonha nenhuma, Rafael.","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas","remy"], "everton", "everton","Vocês chegaram na final, cara. Isso já é história pro CEDUP."),
+    line(["rafael","arthur","everton","nicolas","remy"], "julio", "julio","Vice-campeão ainda é campeão de alguma coisa, rapaziada. E olha, nem vou mencionar o Calebe dessa vez. ...Ele foi campeão duas vezes, só isso."),
+    line(["rafael","arthur","everton","nicolas","remy"], "rafael", "rafael","(É impossível vencer esse homem.) Bora, ainda tenho um acerto de contas com a diretora Carmen."),
+    {sceneEnd:true, goto:"finalBattleIntro"}
+  ]
+};
+
+/* ---------- 13H. INTERCLASSE — CAMPEÕES ---------- */
+SCRIPT.interclasseCampeao = {
+  label:"Quadra do CEDUP — Interclasse",
+  bgimg:BG.quadraFinal,
+  beats:[
+    {effect:()=>{STATE.flags.interclasseResultado="campeao"; STATE.friendship+=1;}},
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "julio", "julio","*apito na boca, gritando mais alto que o megafone* CAMPEÕES! RAFAEL E ARTHUR SÃO OS CAMPEÕES DO INTERCLASSE DO CEDUP!","Quadra do CEDUP — Interclasse"),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "arthur", "arthur","*abraça Rafael, suado e feliz* Depois de eu perder o 1x1 pra você hoje de manhã, nunca imaginei que a gente ia terminar o dia campeão junto."),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "rafael", "rafael","Modo fogo funciona em dupla também, Arthur. Bora comemorar rápido, ainda tenho que encarar a diretora Carmen."),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "nicolas", "nicolas","Estatisticamente, essa foi a melhor tarde da história recente do CEDUP. Vou colocar isso na planilha com destaque em negrito."),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "remy", "remy","Eu ia perguntar pro ChatGPT como comemorar um campeonato, mas acho que só gritar mesmo já resolve. AAAAAH!"),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "julio", "julio","Isso aí merece uma menção especial no mural da escola! Ah, e — só um detalhezinho — meu filho Calebe também foi campeão do interclasse dele. Deve ser genético essa habilidade de vocês."),
+    line(["rafael","arthur","everton","nicolas","remy","julio"], "everton", "everton","*ri* Professor Julio, o senhor é impagável. Parabéns, campeões."),
     {sceneEnd:true, goto:"finalBattleIntro"}
   ]
 };
@@ -923,6 +1123,13 @@ SCRIPT.finalBattleIntro = {
     line(["carmen","rafael","clodoaldo"], "carmen", "carmen","*pausa, quase humana por um segundo* Porque essa escola quase fechou há três anos. Investidor nenhum bota dinheiro em número ruim, Rafael. E sem dinheiro, não tem merenda, não tem quadra, não tem professor Eurico, Leandro, nem Clodoaldo. Eu não sou vilã por prazer. Eu sou vilã por planilha."),
     line(["carmen","rafael","clodoaldo"], "rafael", "rafael","Isso quase faz sentido. Quase."),
     line(["carmen","rafael","clodoaldo"], "carmen", "carmen","Tudo bem. Então, Rafael... vamos ver se você é digno da matrícula ou só mais um número que eu vou apagar da lista."),
+    line(["carmen","rafael","clodoaldo"], "clodoaldo", "clodoaldo","*sussurra rápido pro Rafael antes que Carmen perceba* Toma. Guardei isso no bolso o dia inteiro, achando que ia precisar. Usa com sabedoria."),
+    {effect:()=>{
+      STATE.inventory.cola = Math.max(STATE.inventory.cola, 1)+1;
+      STATE.inventory.redbull = Math.max(STATE.inventory.redbull, 1)+1;
+      STATE.inventory.notafalsa = Math.max(STATE.inventory.notafalsa, 0)+1;
+    }},
+    line([], null, "narrator","(Clodoaldo passa um kit de emergência por baixo da mesa: mais cola, mais red bull, mais uma nota falsa. Rafael sente o inventário ficar mais pesado — e a confiança também.)"),
     line([], null, "narrator","Batalha final. Carmen, a chefona de tudo, contra Rafael. É agora ou nunca."),
     {battleId:"carmen"},
     {sceneEnd:true, goto:"ending"}
@@ -969,6 +1176,12 @@ const MOVES = {
   fogoTotal: {name:"Modo Fogo Total",   en:4, dmg:[16,24], desc:"Golpe pesado. Gasta muita energia.", kind:"dmg"},
   chatgpt:   {name:"Perguntar pro ChatGPT", en:2, dmg:[4,26], desc:"Aleatório: às vezes brilhante, às vezes decepcionante.", kind:"dmg_random"},
   distracao: {name:"Distração: Era Soviética", en:2, dmg:[0,0], desc:"Não causa dano, mas atordoa o professor (perde 1 turno).", kind:"stun"},
+  arremesso3:{name:"Arremesso de Três", en:2, dmg:[10,15], desc:"Arremesso de longa distância. Confiável.", kind:"dmg"},
+  enterrada: {name:"Enterrada de Efeito", en:3, dmg:[13,20], desc:"Ataque forte, mas caro em energia.", kind:"dmg"},
+  assist:    {name:"Assist Perfeito", en:1, heal:[7,12], desc:"Recupera disposição e energia do time.", kind:"heal", enGain:1},
+  acorde:    {name:"Acorde Certeiro", en:1, dmg:[8,13], desc:"Ataque rápido de guitarrista.", kind:"dmg"},
+  riffPesado:{name:"Riff Pesado", en:3, dmg:[14,21], desc:"Solo intenso. Gasta bastante energia.", kind:"dmg"},
+  explicar:  {name:"Explicação Sincera", en:2, heal:[9,15], desc:"Desarma a tensão e recupera disposição.", kind:"heal", enGain:1},
 };
 
 const ITEMS = {
@@ -980,6 +1193,59 @@ const ITEMS = {
 };
 
 const BATTLES = {
+  interclasseQuartas:{
+    title:"Interclasse 3x3 — Quartas de Final",
+    enemyKey:"rivalA",
+    allies:()=>[fighterTemplate("rafael",48,7,["flexao","zoeira","grito","fogoTotal"]), fighterTemplate("arthur",42,7,["arremesso3","enterrada","assist"])],
+    enemy:()=>({key:"rivalA", maxHp:46, hp:46, moves:[
+      {name:"Contra-ataque Rápido", dmg:[8,13], desc:"", kind:"dmg", w:3},
+      {name:"Bloqueio Duro", dmg:[6,10], desc:"", kind:"dmg", w:2},
+      {name:"Provocação de Torcida", dmg:[4,8], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:1},
+    ]}),
+    reward:"Rafael e Arthur fecham as quartas de final com uma cesta no último segundo. A torcida do CEDUP vai à loucura.",
+  },
+  interclasseSemis:{
+    title:"Interclasse 3x3 — Semifinal",
+    enemyKey:"rivalB",
+    allies:()=>[fighterTemplate("rafael",50,7,["flexao","zoeira","grito","fogoTotal"]), fighterTemplate("arthur",44,7,["arremesso3","enterrada","assist"])],
+    enemy:()=>({key:"rivalB", maxHp:58, hp:58, moves:[
+      {name:"Ataque em Dupla", dmg:[9,14], desc:"", kind:"dmg", w:3},
+      {name:"Marcação Pesada", dmg:[7,12], desc:"", kind:"dmg", w:2},
+      {name:"Zoeira da Arquibancada", dmg:[5,9], desc:"", kind:"dmg", status:"raiva", chance:0.45, w:1},
+    ]}),
+    reward:"O 3º Ano jogava pesado, mas Rafael e Arthur seguram a pressão e avançam pra decisão.",
+  },
+  interclasseFinal:{
+    title:"Interclasse 3x3 — Grande Final",
+    enemyKey:"rivalC",
+    allies:()=>[fighterTemplate("rafael",52,8,["flexao","zoeira","grito","fogoTotal"]), fighterTemplate("arthur",46,8,["arremesso3","enterrada","assist"])],
+    enemy:()=>({key:"rivalC", maxHp:66, hp:66, moves:[
+      {name:"Experiência de Veterano", dmg:[10,15], desc:"", kind:"dmg", w:3},
+      {name:"Jogada Ensaiada", dmg:[8,13], desc:"", kind:"dmg", w:2},
+      {name:"Pressão Psicológica", dmg:[6,10], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:1},
+    ]}),
+    reward:"A grande final do interclasse. Se Rafael e Arthur vencerem aqui, o CEDUP inteiro vai lembrar desse dia.",
+  },
+  remySolo:{
+    title:"Remy vs Assessor Kim — Missão de Interceptação",
+    enemyKey:"assessor",
+    allies:()=>[fighterTemplate("remy",38,7,["chatgpt","distracao","grito"])],
+    enemy:()=>({key:"assessor", maxHp:40, hp:40, moves:[
+      {name:"Protocolo de Segurança", dmg:[7,12], desc:"", kind:"dmg", w:3},
+      {name:"Interrogatório Formal", dmg:[9,13], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:2},
+    ]}),
+    reward:"Remy consegue distrair o Assessor Kim tempo suficiente pra evitar um constrangimento internacional dentro da escola.",
+  },
+  evertonSolo:{
+    title:"Everton vs Seu Valdomiro — Mal-entendido do Assobio",
+    enemyKey:"zelador",
+    allies:()=>[fighterTemplate("everton",36,7,["acorde","riffPesado","explicar"])],
+    enemy:()=>({key:"zelador", maxHp:36, hp:36, moves:[
+      {name:"Vassourada Retórica", dmg:[6,11], desc:"", kind:"dmg", w:3},
+      {name:"'Vou te levar pra Sidneia'", dmg:[8,12], desc:"", kind:"dmg", status:"raiva", chance:0.35, w:2},
+    ]}),
+    reward:"Depois de uma boa conversa (e uns acordes de guitarra), Seu Valdomiro entende que Everton não quebrou nada. Ficam até amigos.",
+  },
   arthur:{
     title:"Arthur — Duelo de Ego no 1x1",
     enemyKey:"arthur",
@@ -1038,11 +1304,11 @@ const BATTLES = {
   carmen:{
     title:"Diretora Carmen — Julgamento Final",
     enemyKey:"carmen",
-    allies:()=>[fighterTemplate("rafael",65,9,["flexao","zoeira","grito","fogoTotal"])],
-    enemy:()=>({key:"carmen", maxHp:110, hp:110, moves:[
-      {name:"Corte Orçamentário", dmg:[13,19], desc:"", kind:"dmg", w:3},
-      {name:"Reunião com Investidores", dmg:[10,15], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:2},
-      {name:"Advertência Formal", dmg:[17,24], desc:"", kind:"dmg", w:2},
+    allies:()=>[fighterTemplate("rafael",70,10,["flexao","zoeira","grito","fogoTotal"])],
+    enemy:()=>({key:"carmen", maxHp:88, hp:88, moves:[
+      {name:"Corte Orçamentário", dmg:[10,15], desc:"", kind:"dmg", w:3},
+      {name:"Reunião com Investidores", dmg:[8,13], desc:"", kind:"dmg", status:"raiva", chance:0.4, w:2},
+      {name:"Advertência Formal", dmg:[14,20], desc:"", kind:"dmg", w:2},
     ]}),
     reward:"A batalha mais dura do dia. Se Rafael venceu, ele provou que consegue ser estratégico sob pressão máxima.",
   }
@@ -1255,12 +1521,23 @@ function checkBattleEnd(cont){
 
 function endBattle(won){
   if(!won){
+    if(pendingLoseGoto){
+      const dest = pendingLoseGoto;
+      pendingWinGoto = null; pendingLoseGoto = null;
+      playScene(dest);
+      return;
+    }
     STATE.battleRetries++;
     // retry the same battle with full stats reset, keep story flowing but harder for score
     startBattle(battle.id);
     return;
   }
-  const nextScene = pendingSceneAfterBattle;
+  if(pendingWinGoto){
+    const dest = pendingWinGoto;
+    pendingWinGoto = null; pendingLoseGoto = null;
+    playScene(dest);
+    return;
+  }
   advanceBeat();
 }
 
@@ -1271,6 +1548,8 @@ function endBattle(won){
 let currentSceneId = "intro";
 let beatIndex = 0;
 let pendingSceneAfterBattle = null;
+let pendingWinGoto = null;
+let pendingLoseGoto = null;
 
 function showScreen(which){
   $("#title-screen").classList.toggle("hidden", which!=="title");
@@ -1279,16 +1558,69 @@ function showScreen(which){
   $("#end-screen").classList.toggle("hidden", which!=="end");
 }
 
-function playScene(id){
+/* ==========================================================
+   SAVE / CONTINUAR DE ONDE PAROU
+   ========================================================== */
+const SAVE_KEY = "provaDeFogo_save_v1";
+
+function saveProgress(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      sceneId: currentSceneId,
+      state: STATE,
+      savedAt: Date.now()
+    }));
+  }catch(e){
+    /* localStorage bloqueado (ex: preview dentro do Claude) — o jogo
+       continua funcionando normalmente, só sem salvar progresso. */
+  }
+}
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){
+    return null;
+  }
+}
+
+function clearProgress(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+}
+
+function refreshTopbar(){
+  const b = $("#battery");
+  b.textContent = STATE.battery+"%";
+  b.classList.toggle("low", STATE.battery<=20);
+  $("#tb-heat").textContent = STATE.heat;
+}
+
+function checkForSave(){
+  const saved = loadProgress();
+  if(saved && SCRIPT[saved.sceneId]){
+    $("#save-indicator").classList.remove("hidden");
+    $("#btn-continue").classList.remove("hidden");
+    $("#save-scene-label").textContent = SCRIPT[saved.sceneId].label;
+  } else {
+    $("#save-indicator").classList.add("hidden");
+    $("#btn-continue").classList.add("hidden");
+  }
+}
+
+function playScene(id, opts){
+  opts = opts || {};
   currentSceneId = id;
   beatIndex = 0;
   const scene = SCRIPT[id];
   setScene(scene.label);
-  if(id!=="intro"){
+  if(id!=="intro" && !opts.isResume){
     const drain = STATE.flags.pegouPowerbank ? rand(2,4) : rand(6,10);
     setBattery(STATE.battery - drain);
   }
   showScreen("stage");
+  saveProgress();
   advanceBeat();
 }
 
@@ -1317,15 +1649,25 @@ function advanceBeat(){
   const beat = scene.beats[beatIndex];
 
   if(beat.sceneEnd){
-    if(beat.goto === "__END__"){ showEnding(); return; }
-    playScene(beat.goto);
+    const dest = typeof beat.goto === "function" ? beat.goto() : beat.goto;
+    if(dest === "__END__"){ showEnding(); return; }
+    playScene(dest);
     return;
   }
 
   if(beat.battleId){
     pendingSceneAfterBattle = currentSceneId;
+    pendingWinGoto = beat.winGoto || null;
+    pendingLoseGoto = beat.loseGoto || null;
     beatIndex++;
     startBattle(beat.battleId);
+    return;
+  }
+
+  if(beat.effect){
+    beat.effect();
+    beatIndex++;
+    advanceBeat();
     return;
   }
 
@@ -1394,6 +1736,8 @@ function computeGrade(){
   base += STATE.friendship * 0.3;
   base += STATE.flags.pegouPowerbank ? 0.4 : -0.6;
   if(STATE.battery<=0) base -= 0.8;
+  const interclasseBonus = {campeao:0.6, vice:0.3, semis:0.15, quartas:0}[STATE.flags.interclasseResultado] || 0;
+  base += interclasseBonus;
   base = Math.max(0.5, Math.min(10, base));
   // deixa "quebrado" — evita numero redondo
   base = Math.round(base*10)/10;
@@ -1412,6 +1756,7 @@ function gradeComment(g){
 
 function showEnding(){
   showScreen("end");
+  clearProgress();
   const g = computeGrade();
   $("#final-grade").textContent = g.toFixed(1);
   $("#grade-comment").textContent = gradeComment(g);
@@ -1458,29 +1803,65 @@ const EPILOGUES = {
   `
 };
 
+function tournamentEpilogueLine(){
+  const r = STATE.flags.interclasseResultado;
+  const texts = {
+    campeao: "<p>🏆 <b>Interclasse do CEDUP:</b> Rafael e Arthur ergueram o troféu como campeões do 3x3. O mural da escola ainda exibe a foto deles, com o professor Julio insistindo em aparecer no canto da imagem 'só de apoio'.</p>",
+    vice: "<p>🥈 <b>Interclasse do CEDUP:</b> Rafael e Arthur terminaram vice-campeões, perdendo só na grande final pro Time dos Veteranos. Ninguém no CEDUP considera isso uma derrota de verdade.</p>",
+    semis: "<p>🏀 <b>Interclasse do CEDUP:</b> Rafael e Arthur pararam na semifinal — resultado respeitável, segundo a planilha do Nicolas.</p>",
+    quartas: "<p>🏀 <b>Interclasse do CEDUP:</b> Rafael e Arthur caíram logo nas quartas, mas pelo menos jogaram juntos pela primeira vez como dupla de verdade.</p>",
+  };
+  return texts[r] || "";
+}
+
+function missaoEpilogueLine(){
+  if(STATE.flags.controlouRemy){
+    return "<p>🕴️ <b>Enquanto isso:</b> Remy conseguiu segurar o Assessor Kim antes que ele revirasse a escola inteira — um pequeno milagre diplomático assinado por um garoto de 18 anos.</p>";
+  }
+  if(STATE.flags.controlouEverton){
+    return "<p>🧹 <b>Enquanto isso:</b> Everton resolveu o mal-entendido com Seu Valdomiro no sangue-frio (e um pouco de acorde de guitarra). Os dois hoje se cumprimentam no corredor.</p>";
+  }
+  return "";
+}
+
 function renderEpilogue(kind){
   $("#epilogue-choice").classList.add("hidden");
-  $("#epilogue").innerHTML = EPILOGUES[kind];
+  $("#epilogue").innerHTML = EPILOGUES[kind] + tournamentEpilogueLine() + missaoEpilogueLine();
   $("#epilogue-result").classList.remove("hidden");
 }
 
 $("#btn-epi-fogo").addEventListener("click", ()=>renderEpilogue("fogo"));
 $("#btn-epi-estudante").addEventListener("click", ()=>renderEpilogue("estudante"));
 
+function resetState(){
+  STATE.flags = {}; STATE.heat=0; STATE.friendship=0; STATE.battleRetries=0; STATE.battery=100;
+  STATE.inventory={powerbank:1, cola:2, redbull:2, notafalsa:0, resumo:0};
+  refreshTopbar();
+}
+
 $("#btn-start").addEventListener("click", ()=>{
-  setBattery(100);
+  resetState();
+  clearProgress();
   playScene("intro");
 });
 
-$("#btn-restart").addEventListener("click", ()=>{
-  STATE.flags = {}; STATE.heat=0; STATE.friendship=0; STATE.battleRetries=0; STATE.battery=100;
-  STATE.inventory={powerbank:1, cola:2, redbull:2, notafalsa:0, resumo:0};
-  addHeat(0-STATE.heat);
-  showScreen("title");
+$("#btn-continue").addEventListener("click", ()=>{
+  const saved = loadProgress();
+  if(!saved){ checkForSave(); return; }
+  Object.assign(STATE, saved.state);
+  refreshTopbar();
+  playScene(saved.sceneId, {isResume:true});
 });
 
-setBattery(100);
-addHeat(0);
+$("#btn-restart").addEventListener("click", ()=>{
+  resetState();
+  clearProgress();
+  showScreen("title");
+  checkForSave();
+});
+
+resetState();
+checkForSave();
 </script>
 </body>
 </html>
